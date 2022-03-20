@@ -1,5 +1,11 @@
 <script>
-	import { addDoc, collection, onSnapshot } from "firebase/firestore";
+	import {
+		addDoc,
+		collection,
+		onSnapshot,
+		deleteDoc,
+		doc,
+	} from "firebase/firestore";
 	import { onDestroy } from "svelte";
 
 	import { db } from "./firebase";
@@ -12,8 +18,25 @@
 	let tasks = [];
 
 	const handleSubmit = async () => {
-		await addDoc(collection(db, "tasks"), task);
-		console.log("task saved");
+		try {
+			await addDoc(collection(db, "tasks"), task);
+			console.log("task saved");
+		} catch (error) {
+			console.log(error);
+		}
+	};
+
+	const deleteTask = async (id) => {
+		try {
+			// TODO: confirm alert pending
+			await deleteDoc(doc(db, "tasks", id));
+			console.log("task deleted");
+		} catch (error) {
+			console.log(error);
+		}
+
+		await deleteDoc(doc(db, "tasks", id));
+		console.log("task deleted");
 	};
 
 	const unsub = onSnapshot(
@@ -63,7 +86,7 @@
 			<h5>{task.title}</h5>
 			<p>{task.description}</p>
 
-			<button>Delete</button>
+			<button on:click={deleteTask(task.id)}>Delete</button>
 			<button>Edit</button>
 		</div>
 	{/each}
