@@ -17,10 +17,24 @@
 
 	let tasks = [];
 
-	const handleSubmit = async () => {
+	let editStatus = false;
+
+	const addTask = async () => {
 		try {
 			await addDoc(collection(db, "tasks"), task);
 			console.log("task saved");
+		} catch (error) {
+			console.log(error);
+		}
+	};
+
+	const handleSubmit = async () => {
+		try {
+			if (editStatus) {
+				console.log("updating task");
+			} else {
+				addTask();
+			}
 		} catch (error) {
 			console.log(error);
 		}
@@ -37,6 +51,12 @@
 
 		await deleteDoc(doc(db, "tasks", id));
 		console.log("task deleted");
+	};
+
+	const editTask = (currentTask) => {
+		task.title = currentTask.title;
+		task.description = currentTask.description;
+		editStatus = true;
 	};
 
 	const unsub = onSnapshot(
@@ -87,7 +107,7 @@
 			<p>{task.description}</p>
 
 			<button on:click={deleteTask(task.id)}>Delete</button>
-			<button>Edit</button>
+			<button on:click={editTask(task)}>Edit</button>
 		</div>
 	{/each}
 </main>
