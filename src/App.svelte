@@ -5,6 +5,7 @@
 		onSnapshot,
 		deleteDoc,
 		doc,
+		updateDoc,
 	} from "firebase/firestore";
 	import { onDestroy } from "svelte";
 
@@ -19,6 +20,8 @@
 
 	let editStatus = false;
 
+	let currentId = "";
+
 	const addTask = async () => {
 		try {
 			await addDoc(collection(db, "tasks"), task);
@@ -28,16 +31,33 @@
 		}
 	};
 
+	const updateTask = async () => {
+		try {
+			await updateDoc(doc(db, "tasks", currentId), task);
+		} catch (error) {
+			console.log(error);
+		}
+	};
+
 	const handleSubmit = async () => {
 		try {
-			if (editStatus) {
-				console.log("updating task");
-			} else {
+			if (!editStatus) {
 				addTask();
+			} else {
+				updateTask();
+				console.log("updating task");
 			}
 		} catch (error) {
 			console.log(error);
 		}
+
+		task = {
+			title: "",
+			description: "",
+		};
+
+		editStatus = false;
+		currentId = "";
 	};
 
 	const deleteTask = async (id) => {
@@ -56,6 +76,7 @@
 	const editTask = (currentTask) => {
 		task.title = currentTask.title;
 		task.description = currentTask.description;
+		currentId = currentTask.id;
 		editStatus = true;
 	};
 
