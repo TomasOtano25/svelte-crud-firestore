@@ -1,30 +1,42 @@
 <script>
-	export let name;
+	import { addDoc, collection, onSnapshot } from "firebase/firestore";
+
+	import { db } from "./firebase";
+
+	let task = {
+		title: "",
+		description: "",
+	};
+	const handleSubmit = async () => {
+		await addDoc(collection(db, "tasks"), task);
+		console.log("task saved");
+	};
+	// const handleSubmit = (e) => {
+	// 	e.preventDefault();
+	// 	console.log("sended");
+	// };
 </script>
 
 <main>
-	<h1>Hello {name}!</h1>
-	<p>Visit the <a href="https://svelte.dev/tutorial">Svelte tutorial</a> to learn how to build Svelte apps.</p>
+	<form on:submit|preventDefault={handleSubmit}>
+		<label for="title">Title</label>
+		<input
+			bind:value={task.title}
+			type="text"
+			placeholder="Write a title"
+		/>
+
+		<label for="description">Description</label>
+		<textarea
+			bind:value={task.description}
+			id="description"
+			rows="3"
+			placeholder="Write a description"
+		/>
+
+		<button> Save </button>
+	</form>
 </main>
 
 <style>
-	main {
-		text-align: center;
-		padding: 1em;
-		max-width: 240px;
-		margin: 0 auto;
-	}
-
-	h1 {
-		color: #ff3e00;
-		text-transform: uppercase;
-		font-size: 4em;
-		font-weight: 100;
-	}
-
-	@media (min-width: 640px) {
-		main {
-			max-width: none;
-		}
-	}
 </style>
