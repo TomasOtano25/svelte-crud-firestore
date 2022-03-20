@@ -9,6 +9,8 @@
 	} from "firebase/firestore";
 	import { onDestroy } from "svelte";
 
+	import Toastify from "toastify-js";
+
 	import { db } from "./firebase";
 
 	let task = {
@@ -24,8 +26,15 @@
 
 	const addTask = async () => {
 		try {
-			await addDoc(collection(db, "tasks"), task);
+			await addDoc(collection(db, "tasks"), {
+				...task,
+				createdAt: new Date(),
+			});
 			console.log("task saved");
+
+			Toastify({
+				text: "New task created",
+			}).showToast();
 		} catch (error) {
 			console.log(error);
 		}
@@ -65,6 +74,13 @@
 			// TODO: confirm alert pending
 			await deleteDoc(doc(db, "tasks", id));
 			console.log("task deleted");
+
+			Toastify({
+				text: "Task deleted",
+				style: {
+					background: "#f44336",
+				},
+			}).showToast();
 		} catch (error) {
 			console.log(error);
 		}
@@ -100,37 +116,70 @@
 	// };
 </script>
 
-<main>
-	<form on:submit|preventDefault={handleSubmit}>
-		<label for="title">Title</label>
-		<input
-			bind:value={task.title}
-			type="text"
-			placeholder="Write a title"
-		/>
+<main class="container">
+	<div class="row">
+		<div class="col-md-6">
+			<form
+				on:submit|preventDefault={handleSubmit}
+				class="card card-body p-5"
+			>
+				<div class="mb-3">
+					<label for="title" class="text-secondary fs-5">Title</label>
+					<input
+						bind:value={task.title}
+						type="text"
+						placeholder="Write a title"
+						class="form-control"
+					/>
+				</div>
 
-		<label for="description">Description</label>
-		<textarea
-			bind:value={task.description}
-			id="description"
-			rows="3"
-			placeholder="Write a description"
-		/>
+				<div class="mb-3">
+					<label for="description" class="text-secondary fs-5"
+						>Description</label
+					>
+					<textarea
+						bind:value={task.description}
+						id="description"
+						rows="3"
+						placeholder="Write a description"
+						class="form-control"
+					/>
+				</div>
 
-		<button> Save </button>
-	</form>
+				<div>
+					<button class="btn btn-primary"> Save </button>
+				</div>
+			</form>
+		</div>
+		<div class="col-md-6">
+			{#each tasks as task}
+				<div class="card card-body mt-2">
+					<div class="d-flex justify-content-between">
+						<h5>{task.title}</h5>
+						<i class="material-icons" on:click={editTask(task)}
+							>edit</i
+						>
+					</div>
+					<p>{task.description}</p>
+					<div>
+						<button
+							class="btn btn-danger"
+							on:click={deleteTask(task.id)}
+						>
+							<i
+								class="material-icons"
+								style="vertical-align: middle;"
+								>delete_forever</i
+							>
+							Delete
+						</button>
+					</div>
+				</div>
+			{/each}
+		</div>
+	</div>
 
 	<!-- {JSON.stringify(tasks)} -->
-
-	{#each tasks as task}
-		<div>
-			<h5>{task.title}</h5>
-			<p>{task.description}</p>
-
-			<button on:click={deleteTask(task.id)}>Delete</button>
-			<button on:click={editTask(task)}>Edit</button>
-		</div>
-	{/each}
 </main>
 
 <style>
